@@ -143,6 +143,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     myHandler.sendEmptyMessage(1);
                     while (true) {
                         mSocket = mServerSocket.accept();
+                        if( mSocket !=null){
+                            myHandler.sendEmptyMessage(2);
+                        }
                     }
                 }
             } catch (IOException e) {
@@ -181,12 +184,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     case  1:
                         Log.d(TAG, "startServer");
                         Toast.makeText(mainActivity, "startServer", Toast.LENGTH_SHORT).show();
+                        break;
+                    case 2:
+                        Toast.makeText(mainActivity, "connect Server", Toast.LENGTH_SHORT).show();
                         ReceiverRunnable mReceiverRunnable = new ReceiverRunnable();
                         new Thread(mReceiverRunnable).start();
                         SendRunnable mSendRunnable = new SendRunnable();
                         new Thread(mSendRunnable).start();
                         break;
-
                     default:
                         break;
 
