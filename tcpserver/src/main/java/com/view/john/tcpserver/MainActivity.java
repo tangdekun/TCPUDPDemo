@@ -27,7 +27,6 @@ import java.net.Socket;
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     private static final String TAG = "TcpRunnable";
-    private TcpRunnable mTcpRunnable;
     private TextView showTv;
     private EditText msgEt;
     private static ServerSocket mServerSocket = null;
@@ -42,7 +41,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        mTcpRunnable = new TcpRunnable();
         showTv = (TextView) findViewById(R.id.showMessage);
         msgEt = (EditText) findViewById(R.id.message_et);
         EventBus.getDefault().register(this);
@@ -55,7 +53,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.startServer:
                 StartServerRunnable mStartServerRunnable = new StartServerRunnable();
                 new Thread(mStartServerRunnable).start();
-
                 break;
             case R.id.closeServer:
                 try {
@@ -65,7 +62,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 }
                 break;
             case R.id.sendMsg:
-                 msg = msgEt.getText().toString();
+                msg = msgEt.getText().toString();
                 break;
 
             default:
@@ -141,16 +138,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         @Override
         public void run() {
             try {
-                mServerSocket = new ServerSocket(Constant.PORT);
-                myHandler.sendEmptyMessage(1);
-                while (true) {
-                    mSocket = mServerSocket.accept();
-                    ReceiverRunnable mReceiverRunnable = new ReceiverRunnable();
-                    new Thread(mReceiverRunnable).start();
-                    SendRunnable mSendRunnable = new SendRunnable();
-                    new Thread(mSendRunnable).start();
+                if (mServerSocket != null){
+                    mServerSocket = new ServerSocket(Constant.PORT);
+                    myHandler.sendEmptyMessage(1);
+                    while (true) {
+                        mSocket = mServerSocket.accept();
+                    }
                 }
-
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -180,13 +174,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         @Override
         public void handleMessage(Message msg) {
-           super.handleMessage(msg);
+            super.handleMessage(msg);
             MainActivity mainActivity = mActivity.get();
             if (mainActivity != null ){
                 switch(msg.what){
                     case  1:
                         Log.d(TAG, "startServer");
                         Toast.makeText(mainActivity, "startServer", Toast.LENGTH_SHORT).show();
+                        ReceiverRunnable mReceiverRunnable = new ReceiverRunnable();
+                        new Thread(mReceiverRunnable).start();
+                        SendRunnable mSendRunnable = new SendRunnable();
+                        new Thread(mSendRunnable).start();
                         break;
 
                     default:
